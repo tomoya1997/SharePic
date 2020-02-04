@@ -106,8 +106,7 @@ class Photo extends Model
      */
     public function getUrlAttribute()
     {
-        log::debug(url($this->attributes['filename']));
-        return url($this->attributes['filename']);
+        return url("/storage/profile_images/".$this->attributes['filename']);
     }
 
     /**

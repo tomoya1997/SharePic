@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Log;
 
 class PhotoController extends Controller
 {
@@ -57,12 +58,9 @@ class PhotoController extends Controller
 
         // インスタンス生成時に割り振られたランダムなID値と
         // 本来の拡張子を組み合わせてファイル名とする
-        $photo->filename = $photo->id . '.' . $extension;
+        $photo->filename = $photo->id .'.'. $extension;
 
-        // S3にファイルを保存する
-        // 第三引数の'public'はファイルを公開状態で保存するため
-        Storage::cloud()
-            ->putFileAs('', $request->photo, $photo->filename, 'public');
+        $request->photo->storeAs('public/profile_images', $photo->filename);
 
         // データベースエラー時にファイル削除を行うため
         // トランザクションを利用する
@@ -73,8 +71,6 @@ class PhotoController extends Controller
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
-            // DBとの不整合を避けるためアップロードしたファイルを削除
-            Storage::cloud()->delete($photo->filename);
             throw $exception;
         }
 
